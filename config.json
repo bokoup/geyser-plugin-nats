@@ -1,0 +1,9 @@
+{
+    "libpath": "target/release/libgeyser_plugin_nats.so",
+    "addresses": [
+        "FtccGbN7AXvtqWP5Uf6pZ9xMdAyA7DXBmRQtmvjGDX7x",
+        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+        "hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk"
+    ]
+}
