@@ -1,5 +1,5 @@
 {
-    "libpath": "target/release/libgeyser_plugin_nats.so",
+    "libpath": "/home/sol/libgeyser_plugin_nats.so",
     "addresses": [
         "FtccGbN7AXvtqWP5Uf6pZ9xMdAyA7DXBmRQtmvjGDX7x",
         "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
