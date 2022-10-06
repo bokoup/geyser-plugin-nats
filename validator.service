@@ -1,18 +1,29 @@
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
+
 [Unit]
 Description=Solana Validator
 After=network.target
+After=nats-server.service
 Wants=solana-sys-tuner.service
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
+User=caleb
+Group=caleb
+Type=simple
 Restart=always
 RestartSec=1
-User=caleb
+
 LimitNOFILE=1000000
 LogRateLimitIntervalSec=0
+
 Environment="PATH=/bin:/usr/bin:/home/caleb/.local/share/solana/install/active_release/bin"
 ExecStart=/home/caleb/geyser-plugin-nats/start_devnet_validator.sh
+WorkingDirectory=/home/caleb
+
+SyslogIdentifier=SyslogIdentifier=solana-validator
+
 
 [Install]
 WantedBy=multi-user.target

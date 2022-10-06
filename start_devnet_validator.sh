@@ -1,18 +1,26 @@
 #!/bin/bash
+# #coinbas
+# #a16z
+# jump
+# #jito
+#--known-validator XkCriyrNwS3G4rzAXtG5B1nnvb5Ka1JtCku93VqeKAr \
+#--known-validator BpyjeG4SY9r3TNnc3rP22DP3wpsStFA1FaZWywNPy6dr \
+#--known-validator Certusm1sa411sMpV9FPqU5dXAYhmmhygvxJ23S6hJ24 \
+#--known-validator A4hyMd3FyvUJSRafDUSwtLLaQcxRP4r1BRC9w2AJ1to2 \
+#--only-known-rpc \
+
 exec solana-validator \
-    --identity validator-keypair.json \
-    --known-validator XkCriyrNwS3G4rzAXtG5B1nnvb5Ka1JtCku93VqeKAr \  #coinbase
-    --known-validator BpyjeG4SY9r3TNnc3rP22DP3wpsStFA1FaZWywNPy6dr \ #a16z
-    --known-validator Certusm1sa411sMpV9FPqU5dXAYhmmhygvxJ23S6hJ24 \ #jump
-    --known-validator A4hyMd3FyvUJSRafDUSwtLLaQcxRP4r1BRC9w2AJ1to2 \ #jito
+    --identity /home/caleb/validator-keypair.json \
     --no-voting \
-    --only-known-rpc \
-    --ledger ~/ledger \
-    --log ~/solana-validator.log \
+    --full-rpc-api \
+    --private-rpc \
+    --rpc-port 8899 \
+    --ledger /home/caleb/ledger \
+    --log /home/caleb/solana-validator.log \
     --entrypoint entrypoint.devnet.solana.com:8001 \
     --entrypoint entrypoint2.devnet.solana.com:8001 \
     --entrypoint entrypoint3.devnet.solana.com:8001 \
     --entrypoint entrypoint4.devnet.solana.com:8001 \
     --entrypoint entrypoint5.devnet.solana.com:8001 \
     --wal-recovery-mode skip_any_corrupted_record \
-    --geyser-plugin-config config.json
+    --geyser-plugin-config /home/caleb/geyser-plugin-nats/config.json
