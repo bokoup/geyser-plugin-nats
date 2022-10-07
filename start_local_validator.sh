@@ -37,4 +37,6 @@ solana-test-validator \
 --clone AfsUqnMuZ54ieBDvdHGyJ9Apm29UE4zvfGPjkQf65ztc \
 --rpc-port 8899 \
 --url https://api.devnet.solana.com \
---geyser-plugin-config config.json
+
+
+# --geyser-plugin-config config.json

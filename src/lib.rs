@@ -2,8 +2,8 @@ use dashmap::DashSet;
 use log::*;
 use serde::{Deserialize, Serialize};
 use solana_geyser_plugin_interface::geyser_plugin_interface::{
-    GeyserPlugin, ReplicaAccountInfo, ReplicaAccountInfoV2, ReplicaAccountInfoVersions,
-    ReplicaBlockInfoVersions, ReplicaTransactionInfoVersions, Result, SlotStatus,
+    GeyserPlugin, ReplicaAccountInfo, ReplicaAccountInfoVersions, ReplicaBlockInfoVersions,
+    ReplicaTransactionInfoVersions, Result, SlotStatus,
 };
 use solana_sdk::pubkey::Pubkey;
 use std::{fs, str::FromStr};
@@ -91,20 +91,6 @@ impl<'a> From<&ReplicaAccountInfo<'a>> for AccountData<'a> {
     }
 }
 
-impl<'a> From<&ReplicaAccountInfoV2<'a>> for AccountData<'a> {
-    fn from(account: &ReplicaAccountInfoV2<'a>) -> Self {
-        Self {
-            pubkey: account.pubkey,
-            lamports: account.lamports,
-            owner: account.owner,
-            executable: account.executable,
-            rent_epoch: account.rent_epoch,
-            data: account.data,
-            write_version: account.write_version,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 struct AccountData<'a> {
     #[serde(with = "serde_bytes")]
@@ -160,7 +146,6 @@ impl GeyserPlugin for Plugin {
         is_startup: bool,
     ) -> Result<()> {
         let account: AccountData = match account {
-            ReplicaAccountInfoVersions::V0_0_2(account) => account.into(),
             ReplicaAccountInfoVersions::V0_0_1(account) => account.into(),
         };
 
