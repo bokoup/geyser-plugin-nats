@@ -2,7 +2,7 @@
 # Change mint to address of local test solana wallet address
 # Change bpf-program to be id from anchor program
 
-BPF_PROGRAM=FtccGbN7AXvtqWP5Uf6pZ9xMdAyA7DXBmRQtmvjGDX7x
+BPF_PROGRAM=CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi
 WALLET=61mVTaw6hBtwWnSaGXRSJePFWEQqipeCka3evytEVNUp
 
 # build plugin
@@ -37,6 +37,4 @@ solana-test-validator \
 --clone AfsUqnMuZ54ieBDvdHGyJ9Apm29UE4zvfGPjkQf65ztc \
 --rpc-port 8899 \
 --url https://api.devnet.solana.com \
-
-
-# --geyser-plugin-config config.json
+--geyser-plugin-config config.json
