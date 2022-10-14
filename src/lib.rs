@@ -1,16 +1,18 @@
 use dashmap::DashSet;
 use log::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use solana_geyser_plugin_interface::geyser_plugin_interface::{
     GeyserPlugin, ReplicaAccountInfo, ReplicaAccountInfoVersions, ReplicaBlockInfoVersions,
     ReplicaTransactionInfoVersions, Result, SlotStatus,
 };
-use solana_sdk::pubkey::Pubkey;
+use solana_sdk::{pubkey::Pubkey, signature::Signature};
 use std::{fs, str::FromStr};
 
 #[derive(Debug)]
 pub struct Plugin {
-    pub addresses: DashSet<[u8; 32]>,
+    pub account_addresses: DashSet<[u8; 32]>,
+    pub transaction_addresses: DashSet<[u8; 32]>,
     pub mint_authority: Pubkey,
     pub metadata_authority: Pubkey,
     pub auction_house_authority: Pubkey,
@@ -18,7 +20,7 @@ pub struct Plugin {
 }
 
 // bpl-token-metadata
-const BPL_TOKEN_METADATA_ID: &str = "FtccGbN7AXvtqWP5Uf6pZ9xMdAyA7DXBmRQtmvjGDX7x";
+const BPL_TOKEN_METADATA_ID: &str = "CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi";
 const MINT_AUTHORITY_PREFIX: &str = "authority";
 const METADATA_AUTHORITY_PREFIX: &str = "authority";
 const AUCTION_HOUSE_AUTHORITY_ID: &str = "2R7GkXvQQS4iHptUvQMhDvRSNXL8tAuuASNvCYgz3GQW"; // platform_signer id for testing purposes
@@ -60,7 +62,8 @@ impl Plugin {
         let nats_connection = nats::connect("localhost:4222").unwrap();
 
         Self {
-            addresses: DashSet::new(),
+            account_addresses: DashSet::new(),
+            transaction_addresses: DashSet::new(),
             mint_authority,
             metadata_authority,
             auction_house_authority,
@@ -70,11 +73,27 @@ impl Plugin {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct MessageData<'a> {
+pub struct AccountMessageData<'a> {
     #[serde(borrow)]
     pub account: AccountData<'a>,
     pub slot: u64,
     pub is_startup: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TransactionMessageData {
+    pub signature: Signature,
+    pub program_id: Pubkey,
+    pub accounts: Vec<Pubkey>,
+    pub data: Vec<u8>,
+    pub slot: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum MessageData<'a> {
+    #[serde(borrow)]
+    Account(AccountMessageData<'a>),
+    Transaction(TransactionMessageData),
 }
 
 impl<'a> From<&ReplicaAccountInfo<'a>> for AccountData<'a> {
@@ -92,7 +111,7 @@ impl<'a> From<&ReplicaAccountInfo<'a>> for AccountData<'a> {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct AccountData<'a> {
+pub struct AccountData<'a> {
     #[serde(with = "serde_bytes")]
     pub pubkey: &'a [u8],
     pub lamports: u64,
@@ -121,15 +140,23 @@ impl GeyserPlugin for Plugin {
         let data = fs::read_to_string(config_file).unwrap();
         let config: serde_json::Value = serde_json::from_str(&data).unwrap();
 
-        if let Some(addresses) = config["addresses"].as_array() {
-            let addresses_iter: DashSet<[u8; 32]> =
-                DashSet::from_iter(addresses.iter().map(|val| {
-                    let val = val.as_str().unwrap().to_string();
-                    let mut output = [0; 32];
-                    bs58::decode(val).into(&mut output).unwrap();
-                    output
-                }));
-            self.addresses.extend(addresses_iter);
+        fn addresses_to_dashset(addresses: &Vec<Value>) -> DashSet<[u8; 32]> {
+            DashSet::from_iter(addresses.iter().map(|val| {
+                let val = val.as_str().unwrap().to_string();
+                let mut output = [0; 32];
+                bs58::decode(val).into(&mut output).unwrap();
+                output
+            }))
+        }
+
+        if let Some(addresses) = config["account_addresses"].as_array() {
+            self.account_addresses
+                .extend(addresses_to_dashset(addresses));
+        };
+
+        if let Some(addresses) = config["transaction_addresses"].as_array() {
+            self.transaction_addresses
+                .extend(addresses_to_dashset(addresses));
         };
 
         Ok(())
@@ -149,7 +176,9 @@ impl GeyserPlugin for Plugin {
             ReplicaAccountInfoVersions::V0_0_1(account) => account.into(),
         };
 
-        if !self.addresses.contains(account.pubkey) & !self.addresses.contains(account.owner) {
+        if !self.account_addresses.contains(account.pubkey)
+            & !self.account_addresses.contains(account.owner)
+        {
             return Ok(());
         }
 
@@ -166,13 +195,13 @@ impl GeyserPlugin for Plugin {
                 if !(self.auction_house_authority.as_ref() == &account.data[168..200]) {
                     return Ok(());
                 } else {
-                    self.addresses
+                    self.account_addresses
                         .insert(account.pubkey.as_ref().try_into().unwrap());
                 }
             }
             BID_RECEIPT_LEN | LISTING_RECEIPT_LEN => {
                 if !self
-                    .addresses
+                    .account_addresses
                     .contains::<[u8; 32]>(account.data[72..104].try_into().unwrap())
                 {
                     return Ok(());
@@ -180,7 +209,7 @@ impl GeyserPlugin for Plugin {
             }
             PURCHASE_RECEIPT_LEN => {
                 if !self
-                    .addresses
+                    .account_addresses
                     .contains::<[u8; 32]>(account.data[104..136].try_into().unwrap())
                 {
                     return Ok(());
@@ -192,13 +221,13 @@ impl GeyserPlugin for Plugin {
                 if !(&account.data[4..36] == self.mint_authority.as_ref()) {
                     return Ok(());
                 } else {
-                    self.addresses
+                    self.account_addresses
                         .insert(account.pubkey.as_ref().try_into().unwrap());
                 }
             }
             TOKEN_ACCOUNT_LEN => {
                 if !self
-                    .addresses
+                    .account_addresses
                     .contains::<[u8; 32]>(account.data[..32].try_into().unwrap())
                 {
                     return Ok(());
@@ -207,14 +236,14 @@ impl GeyserPlugin for Plugin {
             _ => (),
         }
 
-        let m = MessageData {
+        let m = MessageData::Account(AccountMessageData {
             account,
             slot,
             is_startup,
-        };
+        });
 
         self.nats_connection
-            .publish("update_account", bincode::serialize(&m).unwrap())
+            .publish("messages.account", bincode::serialize(&m).unwrap())
             .unwrap();
         Ok(())
     }
@@ -237,6 +266,36 @@ impl GeyserPlugin for Plugin {
         transaction_info: ReplicaTransactionInfoVersions,
         slot: u64,
     ) -> Result<()> {
+        match transaction_info {
+            ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
+                if !transaction_info.is_vote {
+                    let account_keys = transaction_info.transaction.message().account_keys();
+                    for (pubkey, instruction) in transaction_info
+                        .transaction
+                        .message()
+                        .program_instructions_iter()
+                    {
+                        if self.transaction_addresses.contains(pubkey.as_ref()) {
+                            let t = MessageData::Transaction(TransactionMessageData {
+                                signature: transaction_info.signature.clone(),
+                                program_id: pubkey.clone(),
+                                accounts: instruction
+                                    .accounts
+                                    .iter()
+                                    .map(|i| account_keys.get(*i as usize).unwrap().clone())
+                                    .collect(),
+                                data: instruction.data.clone(),
+                                slot,
+                            });
+                            self.nats_connection
+                                .publish("messages.transaction", bincode::serialize(&t).unwrap())
+                                .unwrap();
+                        }
+                    }
+                }
+            }
+        };
+
         Ok(())
     }
 
@@ -253,7 +312,7 @@ impl GeyserPlugin for Plugin {
 
     /// Check if the plugin is interested in transaction data
     fn transaction_notifications_enabled(&self) -> bool {
-        false
+        true
     }
 }
 
