@@ -2,9 +2,14 @@
 
 ## localnet validator setup
 
+0. install rust tool chain
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
 1. install solana cli
 ```
-sh -c "$(curl -sSfL https://release.solana.com/v1.13.8/install)"`
+sh -c "$(curl -sSfL https://release.solana.com/v1.13.3/install)"`
 ```
 
 See [Install the Solana Tool Suite](https://docs.solana.com/cli/install-solana-cli-tools) for additional instructions.
