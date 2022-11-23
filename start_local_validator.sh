@@ -3,7 +3,8 @@
 # Change bpf-program to be id from anchor program
 
 BPF_PROGRAM=CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi
-WALLET=61mVTaw6hBtwWnSaGXRSJePFWEQqipeCka3evytEVNUp
+# WALLET=61mVTaw6hBtwWnSaGXRSJePFWEQqipeCka3evytEVNUp
+WALLET=$(solana-keygen pubkey)
 
 # build plugin
 cargo build
@@ -22,6 +23,7 @@ if [ ! "$(docker ps -q -f name=nats-server)" ]; then
     # run your container
     docker run -d --name nats-server --rm -p 4222:4222 -p 8222:8222 nats
 fi
+
 
 # start validator
 solana-test-validator \

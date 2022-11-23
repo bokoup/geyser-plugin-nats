@@ -129,6 +129,8 @@ impl GeyserPlugin for Plugin {
         "GeyserPluginNats"
     }
 
+    // TODO: add functionality to query mint and auction_house addresses to add to config.json file.
+    // For now make sure to do manually.
     fn on_load(&mut self, config_file: &str) -> Result<()> {
         solana_logger::setup_with_default("debug");
         info!(
