@@ -3,8 +3,8 @@
 # Change bpf-program to be id from anchor program
 
 BPF_PROGRAM=CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi
-# WALLET=61mVTaw6hBtwWnSaGXRSJePFWEQqipeCka3evytEVNUp
-WALLET=$(solana-keygen pubkey)
+WALLET=61mVTaw6hBtwWnSaGXRSJePFWEQqipeCka3evytEVNUp
+# WALLET=$(solana-keygen pubkey)
 
 # build plugin
 cargo build
