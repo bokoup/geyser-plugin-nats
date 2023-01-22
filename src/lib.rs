@@ -23,7 +23,7 @@ pub struct Plugin {
 const BPL_TOKEN_METADATA_ID: &str = "CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi";
 const MINT_AUTHORITY_PREFIX: &str = "authority";
 const METADATA_AUTHORITY_PREFIX: &str = "authority";
-const AUCTION_HOUSE_AUTHORITY_ID: &str = "2R7GkXvQQS4iHptUvQMhDvRSNXL8tAuuASNvCYgz3GQW"; // platform_signer id for testing purposes
+const AUCTION_HOUSE_AUTHORITY_ID: &str = "A9KyZmfxnKhJs8eguaKj84Ru85aT1TJTZshrcMwqoBRe"; // platform_signer id for testing purposes
 
 // mpl-auction-house
 const AUCTION_HOUSE_LEN: usize = 459;
