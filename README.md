@@ -107,3 +107,8 @@ _checks_
 - https://medium.com/coinmonks/running-a-solana-validator-on-aws-bb86162eaf29
 - https://laine-sa.medium.com/running-a-solana-validator-lessons-tips-6e6d08c0c589
 - https://chainstack.com/how-to-run-a-solana-node/
+
+## notes
+
+- seg fault when built with rustc 1.67 - rustc 1.66.1 works
+- check to make sure ip address of validator is added to postgres instance on gcp
