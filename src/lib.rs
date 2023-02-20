@@ -20,7 +20,7 @@ pub struct Plugin {
 }
 
 // bpl-token-metadata
-const BPL_TOKEN_METADATA_ID: &str = "CjSoZrc2DBZTv1UdoMx8fTcCpqEMXCyfm2EuTwy8yiGi";
+const BPL_TOKEN_METADATA_ID: &str = "HB53jiCac5VtNdokJeibrfd1QJsyWWFe56M1TQUSKQfY";
 const MINT_AUTHORITY_PREFIX: &str = "authority";
 const METADATA_AUTHORITY_PREFIX: &str = "authority";
 const AUCTION_HOUSE_AUTHORITY_ID: &str = "A9KyZmfxnKhJs8eguaKj84Ru85aT1TJTZshrcMwqoBRe"; // platform_signer id for testing purposes
