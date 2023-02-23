@@ -1,5 +1,5 @@
 {
-    "libpath": "target/debug/libgeyser_plugin_nats.so",
+    "libpath": "target/release/libgeyser_plugin_nats.so",
     "account_addresses": [
         "HB53jiCac5VtNdokJeibrfd1QJsyWWFe56M1TQUSKQfY",
         "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",

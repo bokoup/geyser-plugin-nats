@@ -3,8 +3,8 @@ use log::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use solana_geyser_plugin_interface::geyser_plugin_interface::{
-    GeyserPlugin, ReplicaAccountInfo, ReplicaAccountInfoVersions, ReplicaBlockInfoVersions,
-    ReplicaTransactionInfoVersions, Result, SlotStatus,
+    GeyserPlugin, ReplicaAccountInfo, ReplicaAccountInfoV2, ReplicaAccountInfoVersions,
+    ReplicaBlockInfoVersions, ReplicaTransactionInfoVersions, Result, SlotStatus,
 };
 use solana_sdk::{pubkey::Pubkey, signature::Signature};
 use std::{fs, str::FromStr};
@@ -110,6 +110,20 @@ impl<'a> From<&ReplicaAccountInfo<'a>> for AccountData<'a> {
     }
 }
 
+impl<'a> From<&ReplicaAccountInfoV2<'a>> for AccountData<'a> {
+    fn from(account: &ReplicaAccountInfoV2<'a>) -> Self {
+        Self {
+            pubkey: account.pubkey,
+            lamports: account.lamports,
+            owner: account.owner,
+            executable: account.executable,
+            rent_epoch: account.rent_epoch,
+            data: account.data,
+            write_version: account.write_version,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AccountData<'a> {
     #[serde(with = "serde_bytes")]
@@ -176,6 +190,7 @@ impl GeyserPlugin for Plugin {
     ) -> Result<()> {
         let account: AccountData = match account {
             ReplicaAccountInfoVersions::V0_0_1(account) => account.into(),
+            ReplicaAccountInfoVersions::V0_0_2(account) => account.into(),
         };
 
         if !self.account_addresses.contains(account.pubkey)
@@ -270,6 +285,33 @@ impl GeyserPlugin for Plugin {
     ) -> Result<()> {
         match transaction_info {
             ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
+                if !transaction_info.is_vote {
+                    let account_keys = transaction_info.transaction.message().account_keys();
+                    for (pubkey, instruction) in transaction_info
+                        .transaction
+                        .message()
+                        .program_instructions_iter()
+                    {
+                        if self.transaction_addresses.contains(pubkey.as_ref()) {
+                            let t = MessageData::Transaction(TransactionMessageData {
+                                signature: transaction_info.signature.clone(),
+                                program_id: pubkey.clone(),
+                                accounts: instruction
+                                    .accounts
+                                    .iter()
+                                    .map(|i| account_keys.get(*i as usize).unwrap().clone())
+                                    .collect(),
+                                data: instruction.data.clone(),
+                                slot,
+                            });
+                            self.nats_connection
+                                .publish("messages.transaction", bincode::serialize(&t).unwrap())
+                                .unwrap();
+                        }
+                    }
+                }
+            }
+            ReplicaTransactionInfoVersions::V0_0_2(transaction_info) => {
                 if !transaction_info.is_vote {
                     let account_keys = transaction_info.transaction.message().account_keys();
                     for (pubkey, instruction) in transaction_info
