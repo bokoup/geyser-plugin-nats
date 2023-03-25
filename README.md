@@ -110,5 +110,5 @@ _checks_
 
 ## notes
 
-- seg fault when built with rustc 1.67 - rustc 1.66.1 works
+- seg fault when built with rustc 1.67 - rustc 1.60 works
 - check to make sure ip address of validator is added to postgres instance on gcp

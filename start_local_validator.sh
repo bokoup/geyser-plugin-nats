@@ -25,9 +25,9 @@ if [ ! "$(docker ps -q -f name=nats-server)" ]; then
 fi
 
 
+
 # start validator
 solana-test-validator \
---reset \
 --mint $WALLET \
 --bind-address 0.0.0.0 \
 --bpf-program \
@@ -38,7 +38,7 @@ solana-test-validator \
 --clone hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk \
 --clone AfsUqnMuZ54ieBDvdHGyJ9Apm29UE4zvfGPjkQf65ztc \
 --rpc-port 8899 \
---url https://api.devnet.solana.com
+--url https://api.devnet.solana.com \
 --geyser-plugin-config config.json
 
 

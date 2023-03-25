@@ -85,6 +85,7 @@ pub struct TransactionMessageData {
     pub signature: Signature,
     pub program_id: Pubkey,
     pub accounts: Vec<Pubkey>,
+    pub balances: Vec<u64>,
     pub data: Vec<u8>,
     pub slot: u64,
 }
@@ -301,6 +302,10 @@ impl GeyserPlugin for Plugin {
                                     .iter()
                                     .map(|i| account_keys.get(*i as usize).unwrap().clone())
                                     .collect(),
+                                balances: transaction_info
+                                    .transaction_status_meta
+                                    .post_balances
+                                    .clone(),
                                 data: instruction.data.clone(),
                                 slot,
                             });
@@ -328,6 +333,10 @@ impl GeyserPlugin for Plugin {
                                     .iter()
                                     .map(|i| account_keys.get(*i as usize).unwrap().clone())
                                     .collect(),
+                                balances: transaction_info
+                                    .transaction_status_meta
+                                    .post_balances
+                                    .clone(),
                                 data: instruction.data.clone(),
                                 slot,
                             });
